@@ -8,4 +8,43 @@
     <setting propertyKey="@Properties.count" title="@Strings.CountTitle">
         <settingConfig type="numeric" min="1" max="50"/>
     </setting>
+    <setting propertyKey="@Properties.sport_racebike" title="@Strings.Sport_racebike">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_e_racebike" title="@Strings.Sport_e_racebike">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_mtb_easy" title="@Strings.Sport_mtb_easy">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_e_mtb_easy" title="@Strings.Sport_e_mtb_easy">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_touringbicycle" title="@Strings.Sport_touringbicycle">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_e_touringbicycle" title="@Strings.Sport_e_touringbicycle">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_mtb" title="@Strings.Sport_mtb">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_e_mtb" title="@Strings.Sport_e_mtb">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_mtb_advanced" title="@Strings.Sport_mtb_advanced">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_e_mtb_advanced" title="@Strings.Sport_e_mtb_advanced">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_hike" title="@Strings.Sport_hike">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_mountaineering" title="@Strings.Sport_mountaineering">
+        <settingConfig type="boolean"/>
+    </setting>
+    <setting propertyKey="@Properties.sport_jogging" title="@Strings.Sport_jogging">
+        <settingConfig type="boolean"/>
+    </setting>
 </settings>

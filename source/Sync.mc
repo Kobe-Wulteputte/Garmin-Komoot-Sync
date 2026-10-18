@@ -4,18 +4,20 @@ import Toybox.Lang;
 import Toybox.PersistedContent;
 import Toybox.StringUtil;
 
-// One sync run: log in, load the latest planned cycling tours, remove own courses whose tour Komoot no longer has, install missing and changed latest tours.
+// One sync run: log in, load the latest planned tours of the chosen sports, remove own courses whose tour Komoot no longer has, install missing and changed latest tours.
 // Tours are loaded one per request: Komoot sends ~7 KB of JSON per tour and some tours are much larger (-402 on a page of 5).
 class Sync {
     private const API = "https://api.komoot.de";
-    // Every Komoot cycling sport (https://static.komoot.de/doc/external-api/v007/sports.html).
-    private const CYCLING_SPORTS = "racebike,e_racebike,touringbicycle,e_touringbicycle,mtb,e_mtb,mtb_easy,e_mtb_easy,mtb_advanced,e_mtb_advanced,downhillbike,citybike";
+    // Komoot sports that can be planned (https://static.komoot.de/doc/external-api/v007/sports.html); each has a "sport_<id>" setting.
+    private const SPORTS = ["racebike", "e_racebike", "mtb_easy", "e_mtb_easy", "touringbicycle", "e_touringbicycle",
+        "mtb", "e_mtb", "mtb_advanced", "e_mtb_advanced", "hike", "mountaineering", "jogging"];
 
     private var _log;
     private var _onDone;
     private var _auth = "";
     private var _username = "";
     private var _count = 5;
+    private var _sportTypes = "";
     private var _index = 0;
     private var _latest = [];
     private var _installedChanges = {};
@@ -39,6 +41,11 @@ class Sync {
             return;
         }
         _count = countSetting();
+        _sportTypes = sportTypesSetting();
+        if (_sportTypes.length() == 0) {
+            finish("Turn on at least one sport in the app settings");
+            return;
+        }
         var stored = Storage.getValue("installedChanges");
         _installedChanges = stored == null ? {} : stored;
         log("Logging in to Komoot");
@@ -128,7 +135,7 @@ class Sync {
 
     private function requestLatest() {
         get(API + "/v007/users/" + _username + "/tours/",
-            { "type" => "tour_planned", "sport_types" => CYCLING_SPORTS, "sort_field" => "date", "sort_direction" => "desc",
+            { "type" => "tour_planned", "sport_types" => _sportTypes, "sort_field" => "date", "sort_direction" => "desc",
               "limit" => "1", "page" => _index.toString() },
             _auth, Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON, method(:onLatest));
     }
@@ -202,6 +209,17 @@ class Sync {
             password = builtIn[1];
         }
         return password == null || password.length() == 0 ? null : [email, password];
+    }
+
+    // Comma-separated ids of the sports switched on in the settings.
+    private function sportTypesSetting() {
+        var types = "";
+        for (var i = 0; i < SPORTS.size(); i++) {
+            if (Properties.getValue("sport_" + SPORTS[i]) == true) {
+                types += (types.length() > 0 ? "," : "") + SPORTS[i];
+            }
+        }
+        return types;
     }
 
     private function countSetting() {

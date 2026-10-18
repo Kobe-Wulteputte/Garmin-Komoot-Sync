@@ -2,4 +2,17 @@
     <property id="email" type="string"></property>
     <property id="password" type="string"></property>
     <property id="count" type="number">5</property>
+    <property id="sport_racebike" type="boolean">true</property>
+    <property id="sport_e_racebike" type="boolean">true</property>
+    <property id="sport_mtb_easy" type="boolean">true</property>
+    <property id="sport_e_mtb_easy" type="boolean">true</property>
+    <property id="sport_touringbicycle" type="boolean">true</property>
+    <property id="sport_e_touringbicycle" type="boolean">true</property>
+    <property id="sport_mtb" type="boolean">true</property>
+    <property id="sport_e_mtb" type="boolean">true</property>
+    <property id="sport_mtb_advanced" type="boolean">true</property>
+    <property id="sport_e_mtb_advanced" type="boolean">true</property>
+    <property id="sport_hike" type="boolean">false</property>
+    <property id="sport_mountaineering" type="boolean">false</property>
+    <property id="sport_jogging" type="boolean">false</property>
 </properties>

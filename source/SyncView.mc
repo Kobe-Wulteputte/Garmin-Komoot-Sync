@@ -65,9 +65,14 @@ class SyncView extends WatchUi.View {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
         var lineHeight = dc.getFontHeight(Graphics.FONT_XTINY);
-        _visible = dc.getHeight() / lineHeight;
+        // Round watches (fenix): centred lines in the middle band, where the screen is wide enough.
+        var round = System.getDeviceSettings().screenShape == System.SCREEN_SHAPE_ROUND;
+        var margin = round ? dc.getHeight() / 6 : 0;
+        var x = round ? dc.getWidth() / 2 : 2;
+        var justify = round ? Graphics.TEXT_JUSTIFY_CENTER : Graphics.TEXT_JUSTIFY_LEFT;
+        _visible = (dc.getHeight() - 2 * margin) / lineHeight;
         for (var i = 0; i < _visible && _top + i < _lines.size(); i++) {
-            dc.drawText(2, i * lineHeight, Graphics.FONT_XTINY, _lines[_top + i], Graphics.TEXT_JUSTIFY_LEFT);
+            dc.drawText(x, margin + i * lineHeight, Graphics.FONT_XTINY, _lines[_top + i], justify);
         }
     }
 

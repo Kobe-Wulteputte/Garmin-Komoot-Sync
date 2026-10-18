@@ -1,6 +1,6 @@
 # Komoot Edge Sync
 
-A Connect IQ device app for Garmin Edge bike computers (Edge 540, 550, 830, 840, 850, 1040, 1050). You start it by hand. It makes the
+A Connect IQ device app for Garmin Edge bike computers (Edge 540, 550, 830, 840, 850, 1040, 1050) and fēnix watches (fēnix 7, 8 and E families). You start it by hand. It makes the
 device hold your latest X Komoot planned tours as courses, and removes the courses it
 installed itself once their tour is gone from Komoot.
 
@@ -17,7 +17,7 @@ Komoot's own Connect IQ app, so tours end up on the device twice.
 | Komoot access | Unofficial API (no partner contract). All calls run on the Edge through the phone or WiFi. No backend. |
 | Credentials | Komoot email and password in the app settings (Garmin Connect Mobile). Stored in plain text on phone and device. |
 | Login | Every sync: `GET https://api.komoot.de/v006/account/email/{email}/` with Basic `email:password`. The response holds `username` and `password` (a token). Later calls use Basic `username:token`. No token caching. |
-| Which tours | Planned cycling tours only (`type=tour_planned`, `sport_types=` every cycling sport, comma-separated), newest first. Cycling sports: racebike, e_racebike, touringbicycle, e_touringbicycle, mtb, e_mtb, mtb_easy, e_mtb_easy, mtb_advanced, e_mtb_advanced, downhillbike, citybike. |
+| Which tours | Planned tours of the sports switched on in the settings (`type=tour_planned`, `sport_types=` comma-separated), newest first. One boolean setting `sport_<id>` per sport Komoot can plan (13); the 10 cycling ones default on, hike/mountaineering/jogging off. Tracking-only sports (downhillbike, citybike) are left out since they cannot be planned. If none is on, the sync stops. Before 2026-10-18 the list was fixed to cycling. Cycling sports: racebike, e_racebike, touringbicycle, e_touringbicycle, mtb, e_mtb, mtb_easy, e_mtb_easy, mtb_advanced, e_mtb_advanced, downhillbike, citybike. |
 | X | App setting, default 5, maximum 50 (raised from 20 on 2026-10-18). Each tour costs one list request, so a sync of 50 makes 50+ requests through the phone. |
 | Install | A tour in the latest X is installed unless the app already owns a course for it, or a course on the device matches: its name ends with `" " + tourId` (Komoot app and Komoot FIT downloads), or equals the tour name, ignoring case (Garmin Connect sync). |
 | Remove | Only courses this app installed, and only when Komoot answers `404` for their tour (`GET /v007/tours/{id}`). Own courses whose tour is among the latest X are not checked. Tours that are still planned but outside the latest X stay. |
@@ -81,11 +81,13 @@ Turn the spike into the flow above: pagination, the pure decision function with 
 - 2026-10-18, real Edge 840 (edge830 build): the `.SET` file copied from the simulator to `Garmin\Apps\Settings` was not picked up; the app saw empty settings.
 
 - 2026-10-18: **All "real Edge" tests above actually ran on an Edge 840** (the owner has an 840; the edge830 build ran on it unchanged). Support widened to Edge 540, 550, 830, 840, 850, 1040, 1050. From the SDK device files: 540/840 are 246x322, 1040 is 282x470, 550/850 are 420x600, 1050 is 480x800; all give a device app 1 MB and run Connect IQ 6.0. The 540 and 550 have no touchscreen, so the app tells them to press enter instead of tap.
+- 2026-10-18: fēnix 7 and up added (fenix7, 7pro, 7pronowifi, 7s, 7spro, 7x, 7xpro, 7xpronowifi, 843mm, 847mm, 8pro47mm, 8solar47mm, 8solar51mm, fenixe). Their SDK device files have `getAppCourses` and `HTTP_RESPONSE_CONTENT_TYPE_FIT`, 768 KB for a device app, round 240–454 px screens, all touch. All 21 products build; fenix7 and fenix847mm start in the simulator. Round screens draw the log centred with a sixth of the height as top and bottom margin.
 
 ## Open facts
 
 - Whether Komoot bumps `changed_at` when a route is edited (the update feature depends on it; not yet tested on the device).
 
 - Maximum number of courses on the Edge 840.
-- The Edge 540, 550, 830, 850, 1040 and 1050 builds have not run on a real device.
+- The Edge 540, 550, 830, 850, 1040 and 1050 and all fēnix builds have not run on a real device.
+- Whether long log lines fit on round fēnix screens (the view centres them in the middle two thirds).
 - Whether Komoot's tour list can be trimmed to fewer fields, if it runs out of memory.

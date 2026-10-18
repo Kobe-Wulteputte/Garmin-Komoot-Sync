@@ -1,10 +1,12 @@
 # Garmin Komoot Sync
 
-A Connect IQ app for Garmin Edge bike computers (Edge 540, 550, 830, 840, 850, 1040 and 1050) that keeps your latest Komoot cycling routes on the device.
+A Connect IQ app for Garmin Edge bike computers and fēnix watches that keeps your latest Komoot routes on the device.
+
+**Devices:** Edge 540, 550, 830, 840, 850, 1040, 1050; fēnix 7, 7S, 7X (also Pro and Pro Solar), fēnix 8 (43/47/51 mm, Pro, Solar) and fēnix E. Variants that share a fēnix build (quatix, tactix, Enduro 2) get the app too.
 
 Start it on the Edge and it:
 
-- installs your latest X planned Komoot **cycling** tours as courses (X is a setting, default 5, maximum 50),
+- installs your latest X planned Komoot tours of the sports you choose as courses (X is a setting, default 5, maximum 50; all cycling sports are on by default),
 - skips tours that are already on the Edge from any source (Garmin Connect sync, Komoot's own Connect IQ app, or this app),
 - downloads a tour again when you edited it in Komoot,
 - removes the courses it installed itself once you delete their tour in Komoot.
@@ -62,7 +64,7 @@ This creates `bin\komoot-edge-sync.iq`. Never upload a build made with `spike/bu
 
 ### 5. Enter your Komoot login
 
-In the Garmin Connect app (or the Connect IQ app): your Edge → Connect IQ apps → **Komoot Sync** → Settings. Fill in your Komoot email, password and the number of latest tours, then save and sync the Edge.
+In the Garmin Connect app (or the Connect IQ app): your Edge → Connect IQ apps → **Komoot Sync** → Settings. Fill in your Komoot email, password and the number of latest tours, switch on the sports you want synced, then save and sync the Edge.
 
 ### Updating the beta
 
@@ -81,7 +83,7 @@ Tap the screen to sync again. Swipe up and down to scroll the log.
 
 ## How it decides
 
-- **Which tours:** planned tours (not recorded rides) in any Komoot cycling sport, newest first.
+- **Which tours:** planned tours (not recorded rides) of the sports switched on in the settings, newest first. There is a switch for every sport Komoot can plan: road, gravel, bike touring, mountain biking and enduro (each also as e-bike), hiking, mountaineering and running. The cycling sports are on by default.
 - **Already on the device:** a course whose name ends with the tour id (Komoot names its courses `<tour name> <tour id>`), or whose name equals the tour name (Garmin Connect copies).
 - **Updated:** the app remembers each tour's Komoot `changed_at` when it installs it; if Komoot reports a newer one, it downloads the tour again and only then deletes the old course.
 - **Removed:** only courses this app installed, and only when Komoot answers "not found" for their tour. Tours that are still planned but no longer among the latest X stay on the Edge.
@@ -111,6 +113,6 @@ In VS Code, press **F5** to run the app in the simulator; set the login under Fi
 
 ## Limitations
 
-- Tested on a real Edge 840 only. The other Edge models build and use the same APIs, but have not been tried on a device. Adding another device needs its product id in `manifest.xml` and support for `PersistedContent.getCourses()`.
+- Tested on a real Edge 840 only. The other Edge models and the fēnix watches build, start in the simulator and use the same APIs, but have not been tried on a device. On round fēnix screens the log is centred in the middle band; long lines may be cut at the edges. Adding another device needs its product id in `manifest.xml` and support for `PersistedContent.getCourses()`.
 - Courses keep the Komoot tour id at the end of their name.
 - No background sync: Komoot sends about 7 KB of data per tour, more than a background task may use.

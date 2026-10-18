@@ -3,4 +3,17 @@
     <string id="EmailTitle">Komoot email</string>
     <string id="PasswordTitle">Komoot password</string>
     <string id="CountTitle">Number of latest tours</string>
+    <string id="Sport_racebike">Sync Road cycling</string>
+    <string id="Sport_e_racebike">Sync E-road cycling</string>
+    <string id="Sport_mtb_easy">Sync Gravel riding</string>
+    <string id="Sport_e_mtb_easy">Sync E-gravel riding</string>
+    <string id="Sport_touringbicycle">Sync Bike touring</string>
+    <string id="Sport_e_touringbicycle">Sync E-bike touring</string>
+    <string id="Sport_mtb">Sync Mountain biking</string>
+    <string id="Sport_e_mtb">Sync E-mountain biking</string>
+    <string id="Sport_mtb_advanced">Sync Enduro mountain biking</string>
+    <string id="Sport_e_mtb_advanced">Sync E-enduro mountain biking</string>
+    <string id="Sport_hike">Sync Hiking</string>
+    <string id="Sport_mountaineering">Sync Mountaineering</string>
+    <string id="Sport_jogging">Sync Running</string>
 </strings>
