@@ -1,16 +1,27 @@
+import Toybox.Activity;
 import Toybox.Application;
 import Toybox.Communications;
 import Toybox.Lang;
 import Toybox.PersistedContent;
 import Toybox.StringUtil;
+import Toybox.System;
+import Toybox.Timer;
 
 // Komoot's unofficial API, one request at a time. Logs in once per app run.
 class Komoot {
+    static const TIMED_OUT = -1000;
+    static const RECORDING = -1001;
     private const API = "https://api.komoot.de";
+    private const DOWNLOAD_TIMEOUT_S = 60;
 
     private var _auth = null;
     private var _username = "";
     private var _callback;
+    private var _timer = null;
+    private var _stalled = false;
+    private var _progress = null;
+    private var _seconds = 0;
+    private var _bytes = null;
 
     // callback(ok, errorMessage)
     function login(callback) {
@@ -68,11 +79,93 @@ class Komoot {
         _callback.invoke(code, tours);
     }
 
-    // Installs the tour as a course. callback(code, data)
-    function downloadFit(tourId, callback) {
+    // Installs the tour as a course. callback(code, data); progress(seconds, bytes) every second and whenever bytes arrive.
+    // bytes stays null unless the device reports them (Garmin documents byte progress for media downloads only).
+    // The Edge 840 does not install courses while an activity is recording (JSON requests still work): code is RECORDING
+    // when an activity is recording, and TIMED_OUT when the device does not answer in time.
+    // That request may still answer later and could not be told apart from a new one, so no further downloads are
+    // started in this app run.
+    // gpx: download Komoot's GPX instead of its FIT; also a course, to test whether it installs during an activity.
+    function downloadFit(tourId, callback, progress, gpx) {
         _callback = callback;
-        get(API + "/v007/tours/" + tourId + ".fit", null, _auth,
-            Communications.HTTP_RESPONSE_CONTENT_TYPE_FIT, method(:onResponse));
+        if (!gpx && isRecording()) {
+            callback.invoke(RECORDING, null);
+            return;
+        }
+        if (_stalled) {
+            callback.invoke(TIMED_OUT, null);
+            return;
+        }
+        _progress = progress;
+        _seconds = 0;
+        _bytes = null;
+        _timer = new Timer.Timer();
+        _timer.start(method(:onTick), 1000, true);
+        Communications.makeWebRequest(API + "/v007/tours/" + tourId + (gpx ? ".gpx" : ".fit"), null, {
+            :method => Communications.HTTP_REQUEST_METHOD_GET,
+            :headers => { "Authorization" => _auth },
+            :responseType => gpx ? Communications.HTTP_RESPONSE_CONTENT_TYPE_GPX : Communications.HTTP_RESPONSE_CONTENT_TYPE_FIT,
+            :fileDownloadProgressCallback => method(:onBytes)
+        }, method(:onFit));
+    }
+
+    function onFit(code as Number, data as Dictionary or String or PersistedContent.Iterator or Null) as Void {
+        if (_timer == null) {
+            return;
+        }
+        _timer.stop();
+        _timer = null;
+        _callback.invoke(code, data);
+    }
+
+    function onTick() as Void {
+        _seconds++;
+        if (_seconds < DOWNLOAD_TIMEOUT_S) {
+            _progress.invoke(_seconds, _bytes);
+            return;
+        }
+        _timer.stop();
+        _timer = null;
+        _stalled = true;
+        _callback.invoke(TIMED_OUT, null);
+    }
+
+    function onBytes(transferred as Number, size as Number?) as Void {
+        if (_timer != null) {
+            _bytes = transferred;
+            _progress.invoke(_seconds, _bytes);
+        }
+    }
+
+    // Recording, or paused but not yet saved.
+    static function isRecording() {
+        var info = Activity.getActivityInfo();
+        return info != null && info has :timerState && info.timerState != null && info.timerState != Activity.TIMER_STATE_OFF;
+    }
+
+    // The links the device has right now. Web requests go through the phone (Bluetooth) or Wi-Fi; which one a request
+    // uses is not reported, so both are named when both are up.
+    static function connectionText() {
+        var settings = System.getDeviceSettings();
+        if (!(settings has :connectionInfo)) {
+            return settings.phoneConnected ? "Via phone (Bluetooth)" : "No phone connected";
+        }
+        var info = settings.connectionInfo;
+        var phone = isConnected(info, :bluetooth);
+        var wifi = isConnected(info, :wifi);
+        if (phone && wifi) {
+            return "Phone (Bluetooth) and Wi-Fi connected";
+        }
+        return phone ? "Via phone (Bluetooth)" : wifi ? "Via Wi-Fi" : "No phone or Wi-Fi connected";
+    }
+
+    private static function isConnected(info, key) {
+        return info[key] != null && info[key].state == System.CONNECTION_STATE_CONNECTED;
+    }
+
+    // "Downloading 3 of 7 · 12 KB", or the seconds so far when the device reports no bytes.
+    static function progressText(label, seconds, bytes) {
+        return label + " · " + (bytes != null ? (bytes / 1024) + " KB" : seconds + " s");
     }
 
     // 404 means Komoot no longer has the tour. callback(code, data)

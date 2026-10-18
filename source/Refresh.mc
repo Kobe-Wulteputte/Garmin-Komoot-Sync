@@ -21,6 +21,7 @@ class Refresh {
     function start() {
         _card = _view.addCard(RouteFormat.card(_tour, "Waiting"));
         _view.setStatus("Logging in");
+        _view.setSummary(Komoot.connectionText());
         _komoot.login(method(:onLogin));
     }
 
@@ -52,10 +53,20 @@ class Refresh {
         _card[:state] = "Downloading";
         _view.refresh();
         _before = Installed.appCourseIds();
-        _komoot.downloadFit(_tour["id"], method(:onFit));
+        _komoot.downloadFit(_tour["id"], method(:onFit), method(:onProgress), true);
+    }
+
+    function onProgress(seconds, bytes) {
+        _view.setStatus(Komoot.progressText("Downloading", seconds, bytes));
     }
 
     function onFit(code, data) {
+        if (code == Komoot.TIMED_OUT || code == Komoot.RECORDING) {
+            _card[:state] = code == Komoot.RECORDING ? "Skipped" : "Timed out";
+            _view.setStatus(code == Komoot.RECORDING ? "No downloads during an activity" : "Download timed out");
+            _view.setSummary("Try again after your activity");
+            return;
+        }
         if (code != 200 || data == null) {
             _card[:state] = "Failed";
             _view.setStatus("Download failed (" + code + ")");

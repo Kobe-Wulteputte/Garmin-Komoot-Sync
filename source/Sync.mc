@@ -28,6 +28,7 @@ class Sync {
     private var _updated = 0;
     private var _removed = 0;
     private var _failed = 0;
+    private var _downloadLabel = "";
 
     function initialize(view, komoot) {
         _view = view;
@@ -43,6 +44,7 @@ class Sync {
         }
         _startedAt = System.getTimer();
         _view.setStatus("Logging in");
+        _view.setSummary(Komoot.connectionText());
         _komoot.login(method(:onLogin));
     }
 
@@ -110,6 +112,16 @@ class Sync {
         var oldCourse = _queue[0][1];
         _queue = _queue.slice(1, null);
         var card = _cards[tour["id"]];
+        if (code == Komoot.TIMED_OUT || code == Komoot.RECORDING) {
+            // The other downloads would fail the same way.
+            card[:state] = code == Komoot.RECORDING ? "Skipped" : "Timed out";
+            for (var i = 0; i < _queue.size(); i++) {
+                _cards[_queue[i][0]["id"]][:state] = "Skipped";
+            }
+            _view.setStatus(code == Komoot.RECORDING ? "No downloads during an activity" : "Download timed out");
+            _view.setSummary("Try again after your activity");
+            return;
+        }
         if (code == 200 && data != null) {
             Installed.remember(tour, Installed.newCourse(data, _before));
             if (oldCourse == null) {
@@ -197,11 +209,16 @@ class Sync {
             Storage.setValue("lastSync", { "time" => Time.now().value(), "routes" => _added + _updated + _onDevice });
             return;
         }
-        _view.setStatus("Downloading " + (_queueSize - _queue.size() + 1) + " of " + _queueSize);
+        _downloadLabel = "Downloading " + (_queueSize - _queue.size() + 1) + " of " + _queueSize;
+        _view.setStatus(_downloadLabel);
         _cards[_queue[0][0]["id"]][:state] = "Downloading";
         _view.refresh();
         _before = Installed.appCourseIds();
-        _komoot.downloadFit(_queue[0][0]["id"], method(:onFit));
+        _komoot.downloadFit(_queue[0][0]["id"], method(:onFit), method(:onProgress), false);
+    }
+
+    function onProgress(seconds, bytes) {
+        _view.setStatus(Komoot.progressText(_downloadLabel, seconds, bytes));
     }
 
     // Comma-separated ids of the sports switched on in the settings.

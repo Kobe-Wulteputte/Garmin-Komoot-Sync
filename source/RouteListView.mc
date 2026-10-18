@@ -156,7 +156,7 @@ class RouteListView extends WatchUi.View {
         if ("Removed".equals(state)) {
             return _light ? 0xC62828 : 0xFF6666;
         }
-        if ("Failed".equals(state) || "Too large".equals(state)) {
+        if ("Failed".equals(state) || "Too large".equals(state) || "Timed out".equals(state)) {
             return _light ? 0xC56A00 : 0xFFAA00;
         }
         if ("Downloading".equals(state)) {
