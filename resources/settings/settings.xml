@@ -6,7 +6,7 @@
         <settingConfig type="password"/>
     </setting>
     <setting propertyKey="@Properties.count" title="@Strings.CountTitle">
-        <settingConfig type="numeric" min="1" max="50"/>
+        <settingConfig type="numeric" min="1"/>
     </setting>
     <setting propertyKey="@Properties.sport_racebike" title="@Strings.Sport_racebike">
         <settingConfig type="boolean"/>

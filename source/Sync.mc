@@ -227,7 +227,7 @@ class Sync {
         if (count == null || count < 1) {
             return 5;
         }
-        return count > 50 ? 50 : count;
+        return count;
     }
 
     private function get(url, params, auth, responseType, callback) {
