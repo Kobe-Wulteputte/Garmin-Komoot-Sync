@@ -103,7 +103,7 @@ Open **Komoot Sync** from the Connect IQ menu. It starts with a menu:
 
 Swipe up and down (or use the up and down buttons) to scroll through the cards. Back returns to the menu.
 
-**Glance.** On devices with glances (every supported model except the Edge 830) you can add Komoot Sync to the glance list. It shows the app icon, the name and the last sync, for example `17 Oct 14:05 · 5 routes`; select it to open the app.
+**Glance.** On devices with glances (every supported model except the Edge 830) you can add Komoot Sync to the glance list. It shows the app icon, the name and the last sync, for example `17 Oct 14:05 · 5 routes`; select it to open the app. On x40 Edges the icon slot stays blank: a Garmin firmware bug that hits every Connect IQ glance, the Komoot app too.
 
 ## How it decides
 
