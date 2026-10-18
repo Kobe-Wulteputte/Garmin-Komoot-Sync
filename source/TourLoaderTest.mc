@@ -2,7 +2,7 @@ import Toybox.Communications;
 import Toybox.Lang;
 import Toybox.Test;
 
-// 12 tours; the page with positions 5-9 is too large as a whole, and position 7 is too large on its own.
+// 12 tours; the page with positions 6-7 is too large as a whole, and position 7 is too large on its own.
 // Like the real API it answers later: respondAll() delivers the queued answers one at a time.
 (:test)
 class FakeKomoot {
@@ -20,7 +20,7 @@ class FakeKomoot {
             var limit = _pending[1];
             var callback = _pending[2];
             _pending = null;
-            if ((limit == 5 && page == 1) || (limit == 1 && page == 7)) {
+            if ((limit == 2 && page == 3) || (limit == 1 && page == 7)) {
                 callback.invoke(Communications.NETWORK_RESPONSE_TOO_LARGE, []);
             } else {
                 var tours = [];
@@ -71,8 +71,8 @@ function loadsPagesAndFallsBackToSingleTours(logger as Logger) as Boolean {
     Test.assertEqual(7, probe.skips[0]);
     Test.assertEqual(200, probe.done[0]);
     Test.assert(probe.done[1]);
-    // pages: 0 (5), 1 (5, too large), then 5 singles, then page 2 (5, two tours: the end)
-    Test.assertEqual("5,5,1,1,1,1,1,5", LoaderProbe.join(komoot.limits));
+    // pages 0-2 (2 each), page 3 (too large), 2 singles, pages 4-5, then page 6 (empty: the end)
+    Test.assertEqual("2,2,2,2,1,1,2,2,2", LoaderProbe.join(komoot.limits));
     return true;
 }
 
@@ -82,7 +82,7 @@ function stopsAfterTheRequestedPages(logger as Logger) as Boolean {
     var probe = new LoaderProbe();
     new TourLoader(komoot, null, probe.method(:onTour), probe.method(:onSkip), probe.method(:onDone)).load(3);
     komoot.respondAll();
-    Test.assertEqual("0,1,2,3,4", LoaderProbe.join(probe.ids));
+    Test.assertEqual("0,1,2,3", LoaderProbe.join(probe.ids));
     Test.assert(!probe.done[1]);
     return true;
 }

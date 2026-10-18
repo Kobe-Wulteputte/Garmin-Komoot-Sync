@@ -1,10 +1,11 @@
 import Toybox.Lang;
 
-// Loads planned tours newest first, PAGE per request. Komoot sends ~7 KB of JSON per tour and some tours are much
-// larger, so a page can be too large for the device (-402/-403); that page is then loaded one tour per request.
+// Loads planned tours newest first, PAGE per request. Komoot sends 5-19 KB of JSON per tour (older, hand-planned tours
+// carry long `path` and `segments`), and about 35 KB is the most the device accepts, so pages of 5 failed for all but
+// the newest tours. A page that is still too large (-402/-403) is loaded one tour per request.
 // Callbacks: onTour(tour), onSkip(position) for a single tour too large to load, onDone(code, ended).
 class TourLoader {
-    private const PAGE = 5;
+    private const PAGE = 2;
 
     private var _komoot;
     private var _sportTypes;
