@@ -1,10 +1,10 @@
 import Toybox.Application;
 import Toybox.Communications;
 import Toybox.Lang;
+import Toybox.PersistedContent;
 import Toybox.StringUtil;
 
 // Komoot's unofficial API, one request at a time. Logs in once per app run.
-// Tours are loaded one per request: Komoot sends ~7 KB of JSON per tour and some tours are much larger (-402 on a page of 5).
 class Komoot {
     private const API = "https://api.komoot.de";
 
@@ -38,11 +38,11 @@ class Komoot {
         }
     }
 
-    // The planned tour at position `index` (newest first), or null past the last one. sportTypes null means every sport.
-    // callback(code, tour)
-    function fetchTour(index, sportTypes, callback) {
+    // Page `page` of the planned tours, `limit` per page, newest first; an empty array past the last one.
+    // sportTypes null means every sport. callback(code, tours)
+    function fetchPage(page, limit, sportTypes, callback) {
         var params = { "type" => "tour_planned", "sort_field" => "date", "sort_direction" => "desc",
-                       "limit" => "1", "page" => index.toString() };
+                       "limit" => limit.toString(), "page" => page.toString() };
         if (sportTypes != null) {
             params["sport_types"] = sportTypes;
         }
@@ -51,19 +51,21 @@ class Komoot {
             Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON, method(:onTour));
     }
 
+    // Keeps only the fields the app uses, so the full Komoot JSON can be freed.
     function onTour(code, data) {
-        var tour = null;
+        var tours = [];
         if (code == 200) {
             var embedded = data["_embedded"];
-            if (embedded != null && embedded["tours"].size() > 0) {
-                var json = embedded["tours"][0];
-                tour = {
+            var list = embedded == null ? [] : embedded["tours"];
+            for (var i = 0; i < list.size(); i++) {
+                var json = list[i];
+                tours.add({
                     "id" => json["id"].toString(), "name" => json["name"], "changed" => json["changed_at"],
                     "distance" => json["distance"], "date" => json["date"], "sport" => json["sport"]
-                };
+                });
             }
         }
-        _callback.invoke(code, tour);
+        _callback.invoke(code, tours);
     }
 
     // Installs the tour as a course. callback(code, data)
@@ -151,8 +153,34 @@ module Installed {
         return SyncPlan.tourIdOf(course.getName());
     }
 
-    // The course a FIT download created, from the callback's iterator.
-    function downloadedCourse(data) {
-        return data != null && data has :next ? data.next() : null;
+    function appCourseIds() {
+        var ids = {};
+        var it = PersistedContent.getAppCourses();
+        var course = it.next();
+        while (course != null) {
+            ids[course.getId().toString()] = true;
+            course = it.next();
+        }
+        return ids;
+    }
+
+    // The course a FIT download created: from the callback's iterator (Edge 840), else the own course that was not
+    // there before the download (the iterator is not available on every device).
+    function newCourse(data, before) {
+        if (data != null && data has :next) {
+            var course = data.next();
+            if (course != null) {
+                return course;
+            }
+        }
+        var it = PersistedContent.getAppCourses();
+        var course = it.next();
+        while (course != null) {
+            if (!before.hasKey(course.getId().toString())) {
+                return course;
+            }
+            course = it.next();
+        }
+        return null;
     }
 }

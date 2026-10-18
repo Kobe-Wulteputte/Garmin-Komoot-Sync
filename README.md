@@ -6,7 +6,7 @@ A Connect IQ app for Garmin Edge bike computers and fēnix watches that keeps yo
 
 Start it on the Edge and it:
 
-- installs your latest X planned Komoot tours of the sports you choose as courses (X is a setting, default 5, no upper limit; all cycling sports are on by default),
+- installs your latest X planned Komoot tours of the sports you choose as courses (X is a setting, default 30, no upper limit; all cycling sports are on by default),
 - skips tours that are already on the Edge from any source (Garmin Connect sync, Komoot's own Connect IQ app, or this app),
 - downloads a tour again when you edited it in Komoot,
 - removes the courses it installed itself once you delete their tour in Komoot, or, with **Remove routes outside the latest tours** switched on, as soon as they drop out of your latest X.

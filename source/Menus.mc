@@ -25,15 +25,15 @@ class RoutePicker {
     private const PAGE = 10;
 
     private var _komoot;
+    private var _loader;
     private var _tours = [];
-    private var _next = 0;
-    private var _target = 0;
     private var _end = false;
     private var _focus = 0;
     private var _loading;
 
     function initialize(komoot) {
         _komoot = komoot;
+        _loader = new TourLoader(komoot, null, method(:onTour), method(:onSkip), method(:onLoaded));
     }
 
     function open() {
@@ -47,28 +47,25 @@ class RoutePicker {
             _loading.setStatus(message);
             return;
         }
-        loadPage();
+        _loader.load(PAGE);
     }
 
-    function onTour(code, tour) {
-        if (Komoot.isTooLarge(code)) {
-            _next++;
-        } else if (code != 200) {
+    function onTour(tour) {
+        _tours.add(tour);
+        _loading.setStatus("Loading route " + (_tours.size() + 1));
+    }
+
+    // A route too large to load cannot be shown or refreshed.
+    function onSkip(position) {
+    }
+
+    function onLoaded(code, ended) {
+        if (code != 200) {
             _loading.setStatus("Loading failed (" + code + ")");
             return;
-        } else if (tour == null) {
-            _end = true;
-            showMenu();
-            return;
-        } else {
-            _tours.add(tour);
-            _next++;
         }
-        if (_next < _target) {
-            fetchNext();
-        } else {
-            showMenu();
-        }
+        _end = ended;
+        showMenu();
     }
 
     function onPick(id) {
@@ -76,22 +73,12 @@ class RoutePicker {
             _focus = _tours.size();
             _loading = new RouteListView("Loading routes");
             WatchUi.switchToView(_loading, new RouteListDelegate(_loading), WatchUi.SLIDE_IMMEDIATE);
-            loadPage();
+            _loader.load(PAGE);
         } else if (id instanceof Number) {
             var view = new RouteListView("Refreshing");
             WatchUi.pushView(view, new RouteListDelegate(view), WatchUi.SLIDE_LEFT);
             new Refresh(view, _komoot, _tours[id]).start();
         }
-    }
-
-    private function loadPage() {
-        _target = _next + PAGE;
-        fetchNext();
-    }
-
-    private function fetchNext() {
-        _loading.setStatus("Loading route " + (_next + 1));
-        _komoot.fetchTour(_next, null, method(:onTour));
     }
 
     private function showMenu() {

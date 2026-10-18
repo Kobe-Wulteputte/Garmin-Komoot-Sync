@@ -1,6 +1,7 @@
 import Toybox.Application;
 import Toybox.Lang;
 import Toybox.PersistedContent;
+import Toybox.System;
 import Toybox.Time;
 
 // One sync run: load the latest planned tours of the chosen sports, remove own courses whose tour Komoot no longer has,
@@ -12,13 +13,15 @@ class Sync {
 
     private var _view;
     private var _komoot;
-    private var _count = 5;
+    private var _count = 30;
     private var _sportTypes = "";
-    private var _index = 0;
+    private var _loaded = 0;
+    private var _startedAt = 0;
     private var _latest = [];
     private var _cards = {};
     private var _queue = [];
     private var _queueSize = 0;
+    private var _before = {};
     private var _toCheck = [];
     private var _onDevice = 0;
     private var _added = 0;
@@ -38,6 +41,7 @@ class Sync {
             _view.setStatus("Turn on a sport in the settings");
             return;
         }
+        _startedAt = System.getTimer();
         _view.setStatus("Logging in");
         _komoot.login(method(:onLogin));
     }
@@ -47,30 +51,35 @@ class Sync {
             _view.setStatus(message);
             return;
         }
-        requestLatest();
+        _view.setStatus("Loading routes");
+        new TourLoader(_komoot, _sportTypes, method(:onTour), method(:onSkip), method(:onLoaded)).load(_count);
     }
 
-    function onTour(code, tour) {
-        if (Komoot.isTooLarge(code)) {
+    // The loader delivers whole pages, so tours past the latest _count are ignored.
+    function onTour(tour) {
+        if (_loaded < _count) {
+            _loaded++;
+            _latest.add(tour);
+            _cards[tour["id"]] = _view.addCard(RouteFormat.card(tour, "Checking"));
+            _view.setStatus("Loading route " + _loaded + " of " + _count);
+        }
+    }
+
+    function onSkip(position) {
+        if (_loaded < _count) {
+            _loaded++;
             _failed++;
-            _view.addCard({ :name => "Route " + (_index + 1), :detail => "Too much route data to load", :date => "", :state => "Too large" });
-        } else if (code != 200) {
+            _view.addCard({ :name => "Route " + (position + 1), :detail => "Too much route data to load", :date => "", :state => "Too large" });
+        }
+    }
+
+    function onLoaded(code, ended) {
+        if (code != 200) {
             _view.setStatus("Loading failed (" + code + ")");
             _view.setSummary("Nothing was changed");
             return;
-        } else if (tour == null) {
-            applyPlan();
-            return;
-        } else {
-            _latest.add(tour);
-            _cards[tour["id"]] = _view.addCard(RouteFormat.card(tour, "Checking"));
         }
-        _index++;
-        if (_index < _count) {
-            requestLatest();
-        } else {
-            applyPlan();
-        }
+        applyPlan();
     }
 
     function onCheck(code, data) {
@@ -102,7 +111,7 @@ class Sync {
         _queue = _queue.slice(1, null);
         var card = _cards[tour["id"]];
         if (code == 200 && data != null) {
-            Installed.remember(tour, Installed.downloadedCourse(data));
+            Installed.remember(tour, Installed.newCourse(data, _before));
             if (oldCourse == null) {
                 _added++;
                 card[:state] = "Added";
@@ -122,11 +131,6 @@ class Sync {
         }
         _view.refresh();
         installNext();
-    }
-
-    private function requestLatest() {
-        _view.setStatus("Loading route " + (_index + 1) + " of " + _count);
-        _komoot.fetchTour(_index, _sportTypes, method(:onTour));
     }
 
     private function applyPlan() {
@@ -162,6 +166,10 @@ class Sync {
         for (var i = 0; i < _queue.size(); i++) {
             _cards[_queue[i][0]["id"]][:state] = "Waiting";
         }
+        var duplicates = plan[:duplicates];
+        for (var i = 0; i < duplicates.size(); i++) {
+            removeOwn(duplicates[i], "Duplicate copy");
+        }
         var toRemove = plan[:toRemove];
         for (var i = 0; i < toRemove.size(); i++) {
             removeOwn(toRemove[i], "Not in your latest " + _count);
@@ -182,7 +190,8 @@ class Sync {
 
     private function installNext() {
         if (_queue.size() == 0) {
-            _view.setStatus(_failed > 0 ? "Done, " + _failed + " failed" : "Up to date");
+            var seconds = (System.getTimer() - _startedAt) / 1000;
+            _view.setStatus((_failed > 0 ? "Done, " + _failed + " failed" : "Up to date") + " in " + seconds + " s");
             _view.setSummary(_added + " added · " + _updated + " updated · " + _removed + " removed · " + _onDevice + " kept");
             // Shown on the glance.
             Storage.setValue("lastSync", { "time" => Time.now().value(), "routes" => _added + _updated + _onDevice });
@@ -191,6 +200,7 @@ class Sync {
         _view.setStatus("Downloading " + (_queueSize - _queue.size() + 1) + " of " + _queueSize);
         _cards[_queue[0][0]["id"]][:state] = "Downloading";
         _view.refresh();
+        _before = Installed.appCourseIds();
         _komoot.downloadFit(_queue[0][0]["id"], method(:onFit));
     }
 
@@ -207,6 +217,6 @@ class Sync {
 
     private function countSetting() {
         var count = Properties.getValue("count");
-        return count == null || count < 1 ? 5 : count;
+        return count == null || count < 1 ? 30 : count;
     }
 }

@@ -10,6 +10,7 @@ class Refresh {
     private var _card;
     private var _ownCourse = null;
     private var _otherCopy = false;
+    private var _before = {};
 
     function initialize(view, komoot, tour) {
         _view = view;
@@ -45,11 +46,12 @@ class Refresh {
                 names.add(course.getName().toLower());
                 course = it.next();
             }
-            _otherCopy = SyncPlan.isOnDevice(_tour["name"], _tour["id"], names);
+            _otherCopy = SyncPlan.isOnDevice(_tour, names);
         }
         _view.setStatus("Downloading");
         _card[:state] = "Downloading";
         _view.refresh();
+        _before = Installed.appCourseIds();
         _komoot.downloadFit(_tour["id"], method(:onFit));
     }
 
@@ -60,7 +62,7 @@ class Refresh {
             _view.setSummary("The old copy was kept");
             return;
         }
-        Installed.remember(_tour, Installed.downloadedCourse(data));
+        Installed.remember(_tour, Installed.newCourse(data, _before));
         _card[:state] = "Refreshed";
         _view.setStatus("Refreshed");
         if (_ownCourse != null) {

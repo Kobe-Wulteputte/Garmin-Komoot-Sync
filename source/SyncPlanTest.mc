@@ -54,6 +54,27 @@ function recognisesOwnCoursesWithCutOffNames(logger as Logger) as Boolean {
 }
 
 (:test)
+function matchesShortenedNamesAndRemovesDuplicates(logger as Logger) as Boolean {
+    // fenix: Komoot cuts the middle of "<name> <id>", so only the end of the id survives.
+    var latest = [{ "id" => "3100002665", "name" => "Long walk proposal dagstapper Example - 18.6 km", "changed" => "2026-10-01" }];
+    var name = "Long walk proposal dagst... 2665";
+    var appCourses = [["first", name, null], ["second", name, null], ["third", name, null]];
+    var result = SyncPlan.plan(latest, [name, name, name], appCourses, { "3100002665" => "2026-10-01" }, false);
+    Test.assertEqual(0, result[:toAdd].size());
+    Test.assertEqual(1, result[:onDevice]);
+    Test.assertEqual(2, result[:duplicates].size());
+    Test.assertEqual("second", result[:duplicates][0][0]);
+    Test.assertEqual(0, result[:toCheck].size());
+    // A shortened copy from another source also counts as on the device.
+    var other = SyncPlan.plan(latest, [name], [], {}, false);
+    Test.assertEqual(0, other[:toAdd].size());
+    // Not a match: wrong id ending, or too short a name start.
+    Test.assert(!SyncPlan.matchesShortened("Long walk proposal dagst... 9999", latest[0]));
+    Test.assert(!SyncPlan.matchesShortened("Lo... 2665", latest[0]));
+    return true;
+}
+
+(:test)
 function updatesOwnCoursesWhoseTourChanged(logger as Logger) as Boolean {
     var latest = [
         { "id" => "111111", "name" => "Same", "changed" => "2026-10-01" },
