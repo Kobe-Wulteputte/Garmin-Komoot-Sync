@@ -113,6 +113,6 @@ In VS Code, press **F5** to run the app in the simulator; set the login under Fi
 
 ## Limitations
 
-- Tested on a real Edge 840 only. The other Edge models and the fēnix watches build, start in the simulator and use the same APIs, but have not been tried on a device. On round fēnix screens the log is centred in the middle band; long lines may be cut at the edges. Adding another device needs its product id in `manifest.xml` and support for `PersistedContent.getCourses()`.
+- Tested on a real Edge 840 only. The other Edge models and the fēnix watches build, start in the simulator and use the same APIs, but have not been tried on a device. On round fēnix screens the log is centred in the middle band and wrapped to fit. Adding another device needs its product id in `manifest.xml` and support for `PersistedContent.getCourses()`.
 - Courses keep the Komoot tour id at the end of their name.
 - No background sync: Komoot sends about 7 KB of data per tour, more than a background task may use.

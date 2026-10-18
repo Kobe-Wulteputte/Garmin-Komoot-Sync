@@ -82,6 +82,7 @@ Turn the spike into the flow above: pagination, the pure decision function with 
 
 - 2026-10-18: **All "real Edge" tests above actually ran on an Edge 840** (the owner has an 840; the edge830 build ran on it unchanged). Support widened to Edge 540, 550, 830, 840, 850, 1040, 1050. From the SDK device files: 540/840 are 246x322, 1040 is 282x470, 550/850 are 420x600, 1050 is 480x800; all give a device app 1 MB and run Connect IQ 6.0. The 540 and 550 have no touchscreen, so the app tells them to press enter instead of tap.
 - 2026-10-18: fēnix 7 and up added (fenix7, 7pro, 7pronowifi, 7s, 7spro, 7x, 7xpro, 7xpronowifi, 843mm, 847mm, 8pro47mm, 8solar47mm, 8solar51mm, fenixe). Their SDK device files have `getAppCourses` and `HTTP_RESPONSE_CONTENT_TYPE_FIT`, 768 KB for a device app, round 240–454 px screens, all touch. All 21 products build; fenix7 and fenix847mm start in the simulator. Round screens draw the log centred with a sixth of the height as top and bottom margin.
+- 2026-10-18, simulator (fenix847mm): long log lines were cut at the round edges. The view now wraps every line with `Graphics.fitTextToArea` to 70% of the width on round screens (the circle is ~74% wide at the band edges) and to the full width on Edges; confirmed visually by the owner in the simulator.
 
 ## Open facts
 
@@ -89,5 +90,4 @@ Turn the spike into the flow above: pagination, the pure decision function with 
 
 - Maximum number of courses on the Edge 840.
 - The Edge 540, 550, 830, 850, 1040 and 1050 and all fēnix builds have not run on a real device.
-- Whether long log lines fit on round fēnix screens (the view centres them in the middle two thirds).
 - Whether Komoot's tour list can be trimmed to fewer fields, if it runs out of memory.
