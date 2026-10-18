@@ -7,8 +7,9 @@ module SyncPlan {
     // appCourses: courses this app installed, each [course, name].
     // installedChanges: tour id => the tour's "changed" value when this app installed it.
     // toUpdate: [tour, old course] for own courses whose tour changed since install (or was installed before changes were stored).
-    // toCheck: own courses whose tour is not among the latest; they go only if Komoot no longer has the tour.
-    function plan(latest, deviceNames, appCourses, installedChanges) {
+    // keepOnlyLatest: own courses whose tour is not among the latest go to toRemove right away;
+    // otherwise they go to toCheck and are removed only if Komoot no longer has the tour.
+    function plan(latest, deviceNames, appCourses, installedChanges, keepOnlyLatest) {
         var lowerNames = [];
         for (var i = 0; i < deviceNames.size(); i++) {
             lowerNames.add(deviceNames[i].toLower());
@@ -40,14 +41,15 @@ module SyncPlan {
         }
 
         var toCheck = [];
+        var toRemove = [];
         for (var i = 0; i < appCourses.size(); i++) {
             var tourId = tourIdOf(appCourses[i][1]);
             if (tourId != null && !latestIds.hasKey(tourId)) {
-                toCheck.add([appCourses[i][0], appCourses[i][1], tourId]);
+                (keepOnlyLatest ? toRemove : toCheck).add([appCourses[i][0], appCourses[i][1], tourId]);
             }
         }
 
-        return { :toAdd => toAdd, :toUpdate => toUpdate, :toCheck => toCheck, :onDevice => onDevice };
+        return { :toAdd => toAdd, :toUpdate => toUpdate, :toCheck => toCheck, :toRemove => toRemove, :onDevice => onDevice };
     }
 
     // Only a definite "not found" removes a course; any other answer keeps it.

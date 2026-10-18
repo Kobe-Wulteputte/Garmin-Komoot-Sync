@@ -9,7 +9,7 @@ Start it on the Edge and it:
 - installs your latest X planned Komoot tours of the sports you choose as courses (X is a setting, default 5, no upper limit; all cycling sports are on by default),
 - skips tours that are already on the Edge from any source (Garmin Connect sync, Komoot's own Connect IQ app, or this app),
 - downloads a tour again when you edited it in Komoot,
-- removes the courses it installed itself once you delete their tour in Komoot.
+- removes the courses it installed itself once you delete their tour in Komoot, or, with **Remove routes outside the latest tours** switched on, as soon as they drop out of your latest X.
 
 It never touches courses it did not install.
 
@@ -88,7 +88,7 @@ This creates `bin\komoot-edge-sync.iq`. Never upload a build made with `spike/bu
 
 ### 5. Enter your Komoot login
 
-In the Garmin Connect app (or the Connect IQ app): your Edge → Connect IQ apps → **Komoot Sync** → Settings. Fill in your Komoot email, password and the number of latest tours, switch on the sports you want synced, then save and sync the Edge.
+In the Garmin Connect app (or the Connect IQ app): your Edge → Connect IQ apps → **Komoot Sync** → Settings. Fill in your Komoot email, password and the number of latest tours, switch on the sports you want synced, choose whether to remove routes outside the latest tours, then save and sync the Edge.
 
 ### Updating the beta
 
@@ -96,21 +96,19 @@ Download the `.iq` from a newer release (option A) or build a new one with the s
 
 ## Use
 
-Open **Komoot Sync** from the Connect IQ menu on the Edge. It syncs right away and shows a log, ending with a summary:
+Open **Komoot Sync** from the Connect IQ menu. It starts with a menu:
 
-```
-Added 1, updated 0, removed 1
-Already on device 4, failed 0
-```
+- **Sync now** runs the full sync. The screen shows a status line ("Loading route 3 of 5", "Downloading 1 of 2", then "Up to date") and a card per route with its name, length, sport, planned date and a coloured status: Added, Updated, On device, Removed or Failed. A summary line follows at the end, for example `1 added · 0 updated · 1 removed · 4 kept`.
+- **Refresh a route** lists all your planned routes of every sport, newest first, with length, sport and date, ten at a time with **Load more** at the bottom. Pick one and the app downloads it again. If this app installed the old copy, it removes it once the new one is in; a copy from Garmin Connect or the Komoot app cannot be removed and the screen tells you to delete it by hand.
 
-Tap the screen to sync again. Swipe up and down to scroll the log.
+Swipe up and down (or use the up and down buttons) to scroll through the cards. Back returns to the menu.
 
 ## How it decides
 
 - **Which tours:** planned tours (not recorded rides) of the sports switched on in the settings, newest first. There is a switch for every sport Komoot can plan: road, gravel, bike touring, mountain biking and enduro (each also as e-bike), hiking, mountaineering and running. The cycling sports are on by default.
 - **Already on the device:** a course whose name ends with the tour id (Komoot names its courses `<tour name> <tour id>`), or whose name equals the tour name (Garmin Connect copies).
 - **Updated:** the app remembers each tour's Komoot `changed_at` when it installs it; if Komoot reports a newer one, it downloads the tour again and only then deletes the old course.
-- **Removed:** only courses this app installed, and only when Komoot answers "not found" for their tour. Tours that are still planned but no longer among the latest X stay on the Edge.
+- **Removed:** only courses this app installed. By default only when Komoot answers "not found" for their tour, so tours that are still planned but no longer among the latest X stay on the Edge. Switch on **Remove routes outside the latest tours** to keep exactly your latest X (of the chosen sports) instead; that also removes this app's routes of sports you switched off. If a tour in the latest X could not be loaded, the sync skips this cleanup to be safe.
 
 [PLAN.md](PLAN.md) holds the design decisions and the test findings from a real Edge 840.
 

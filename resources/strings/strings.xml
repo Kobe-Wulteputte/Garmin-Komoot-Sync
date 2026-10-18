@@ -3,6 +3,7 @@
     <string id="EmailTitle">Komoot email</string>
     <string id="PasswordTitle">Komoot password</string>
     <string id="CountTitle">Number of latest tours</string>
+    <string id="KeepOnlyLatestTitle">Remove routes outside the latest tours</string>
     <string id="Sport_racebike">Sync Road cycling</string>
     <string id="Sport_e_racebike">Sync E-road cycling</string>
     <string id="Sport_mtb_easy">Sync Gravel riding</string>
