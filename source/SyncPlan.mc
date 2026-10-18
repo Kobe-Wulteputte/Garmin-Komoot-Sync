@@ -4,7 +4,7 @@ import Toybox.Lang;
 module SyncPlan {
     // latest: newest planned tours first, each { "id" => String, "name" => String, "changed" => String? }.
     // deviceNames: names of all courses on the device.
-    // appCourses: courses this app installed, each [course, name].
+    // appCourses: courses this app installed, each [course, name, tour id or null].
     // installedChanges: tour id => the tour's "changed" value when this app installed it.
     // toUpdate: [tour, old course] for own courses whose tour changed since install (or was installed before changes were stored).
     // keepOnlyLatest: own courses whose tour is not among the latest go to toRemove right away;
@@ -16,9 +16,8 @@ module SyncPlan {
         }
         var ownByTour = {};
         for (var i = 0; i < appCourses.size(); i++) {
-            var tourId = tourIdOf(appCourses[i][1]);
-            if (tourId != null) {
-                ownByTour[tourId] = appCourses[i][0];
+            if (appCourses[i][2] != null) {
+                ownByTour[appCourses[i][2]] = appCourses[i][0];
             }
         }
 
@@ -33,7 +32,7 @@ module SyncPlan {
             var changed = tour["changed"];
             if (own != null && changed != null && !changed.equals(installedChanges[tour["id"]])) {
                 toUpdate.add([tour, own]);
-            } else if (isOnDevice(tour["name"], tour["id"], lowerNames)) {
+            } else if (own != null || isOnDevice(tour["name"], tour["id"], lowerNames)) {
                 onDevice++;
             } else {
                 toAdd.add(tour);
@@ -43,9 +42,9 @@ module SyncPlan {
         var toCheck = [];
         var toRemove = [];
         for (var i = 0; i < appCourses.size(); i++) {
-            var tourId = tourIdOf(appCourses[i][1]);
+            var tourId = appCourses[i][2];
             if (tourId != null && !latestIds.hasKey(tourId)) {
-                (keepOnlyLatest ? toRemove : toCheck).add([appCourses[i][0], appCourses[i][1], tourId]);
+                (keepOnlyLatest ? toRemove : toCheck).add(appCourses[i]);
             }
         }
 
@@ -69,14 +68,15 @@ module SyncPlan {
         return false;
     }
 
-    // The Komoot tour id at the end of a course name, or null. Komoot ids have 9+ digits; a short number (a cut-off name) is not an id.
+    // The Komoot tour id at the end of a course name, or null. Komoot ids have 9+ digits; a shorter number is a cut-off id or
+    // part of the name, and reading it as an id could remove the wrong course.
     function tourIdOf(courseName) {
         var chars = courseName.toCharArray();
         var start = chars.size();
         while (start > 0 && chars[start - 1].toNumber() >= 48 && chars[start - 1].toNumber() <= 57) {
             start--;
         }
-        if (chars.size() - start < 6 || start == 0 || chars[start - 1] != ' ') {
+        if (chars.size() - start < 9 || start == 0 || chars[start - 1] != ' ') {
             return null;
         }
         return courseName.substring(start, chars.size());

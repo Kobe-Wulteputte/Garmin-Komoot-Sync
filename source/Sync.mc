@@ -102,7 +102,7 @@ class Sync {
         _queue = _queue.slice(1, null);
         var card = _cards[tour["id"]];
         if (code == 200 && data != null) {
-            Installed.remember(tour);
+            Installed.remember(tour, Installed.downloadedCourse(data));
             if (oldCourse == null) {
                 _added++;
                 card[:state] = "Added";
@@ -138,10 +138,11 @@ class Sync {
             course = it.next();
         }
         var appCourses = [];
+        var owned = Installed.owned();
         it = PersistedContent.getAppCourses();
         course = it.next();
         while (course != null) {
-            appCourses.add([course, course.getName()]);
+            appCourses.add([course, course.getName(), Installed.tourIdFor(course, owned)]);
             course = it.next();
         }
 

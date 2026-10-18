@@ -115,16 +115,44 @@ class Komoot {
     }
 }
 
-// Komoot's changed_at per tour id at the time this app installed the tour; a newer value means the course is stale.
+// What this app installed:
+// - "installedChanges": Komoot's changed_at per tour id at install time; a newer value means the course is stale.
+// - "ownedCourses": course id => [tour id, course name]. The device may cut long course names, which also cuts the
+//   tour id at the end of the name, so the id cannot always be read back from the name.
 module Installed {
     function changes() {
         var stored = Storage.getValue("installedChanges");
         return stored == null ? {} : stored;
     }
 
-    function remember(tour) {
+    function owned() {
+        var stored = Storage.getValue("ownedCourses");
+        return stored == null ? {} : stored;
+    }
+
+    // course is the course the FIT download created, or null when the device did not report it.
+    function remember(tour, course) {
         var all = changes();
         all[tour["id"]] = tour["changed"];
         Storage.setValue("installedChanges", all);
+        if (course != null) {
+            var courses = owned();
+            courses[course.getId().toString()] = [tour["id"], course.getName()];
+            Storage.setValue("ownedCourses", courses);
+        }
+    }
+
+    // Course ids are reused by the device, so a record only counts while the name still matches.
+    function tourIdFor(course, courses) {
+        var entry = courses[course.getId().toString()];
+        if (entry != null && course.getName().equals(entry[1])) {
+            return entry[0];
+        }
+        return SyncPlan.tourIdOf(course.getName());
+    }
+
+    // The course a FIT download created, from the callback's iterator.
+    function downloadedCourse(data) {
+        return data != null && data has :next ? data.next() : null;
     }
 }

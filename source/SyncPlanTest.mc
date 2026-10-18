@@ -20,7 +20,7 @@ function addsOnlyToursMissingFromTheDevice(logger as Logger) as Boolean {
 (:test)
 function checksOnlyOwnCoursesOutsideTheLatest(logger as Logger) as Boolean {
     var latest = [{ "id" => "111111", "name" => "Latest" }];
-    var appCourses = [["latest", "Latest 111111"], ["older", "Older 999999"], ["noId", "No id here"]];
+    var appCourses = [["latest", "Latest 111111", "111111"], ["older", "Older 999999", "999999"], ["noId", "No id here", null]];
     var result = SyncPlan.plan(latest, ["Latest 111111", "Older 999999", "No id here"], appCourses, {}, false);
     Test.assertEqual(1, result[:toCheck].size());
     Test.assertEqual("older", result[:toCheck][0][0]);
@@ -33,11 +33,23 @@ function checksOnlyOwnCoursesOutsideTheLatest(logger as Logger) as Boolean {
 (:test)
 function removesOwnCoursesOutsideTheLatestWhenAsked(logger as Logger) as Boolean {
     var latest = [{ "id" => "111111", "name" => "Latest" }];
-    var appCourses = [["latest", "Latest 111111"], ["older", "Older 999999"], ["noId", "No id here"]];
+    var appCourses = [["latest", "Latest 111111", "111111"], ["older", "Older 999999", "999999"], ["noId", "No id here", null]];
     var result = SyncPlan.plan(latest, ["Latest 111111", "Older 999999", "No id here"], appCourses, {}, true);
     Test.assertEqual(0, result[:toCheck].size());
     Test.assertEqual(1, result[:toRemove].size());
     Test.assertEqual("older", result[:toRemove][0][0]);
+    return true;
+}
+
+(:test)
+function recognisesOwnCoursesWithCutOffNames(logger as Logger) as Boolean {
+    var latest = [{ "id" => "3100000005", "name" => "A long route name the device cuts off", "changed" => "2026-10-01" }];
+    var appCourses = [["own", "A long route name the de", "3100000005"]];
+    var result = SyncPlan.plan(latest, ["A long route name the de"], appCourses, { "3100000005" => "2026-10-01" }, false);
+    Test.assertEqual(0, result[:toAdd].size());
+    Test.assertEqual(0, result[:toCheck].size());
+    Test.assertEqual(1, result[:onDevice]);
+    Test.assert(SyncPlan.tourIdOf("A long route name ... 31000") == null);
     return true;
 }
 
@@ -49,7 +61,7 @@ function updatesOwnCoursesWhoseTourChanged(logger as Logger) as Boolean {
         { "id" => "333333", "name" => "Installed before changes were stored", "changed" => "2026-10-01" },
         { "id" => "444444", "name" => "Garmin Connect copy", "changed" => "2026-10-18" }
     ];
-    var appCourses = [["same", "Same 111111"], ["edited", "Edited 222222"], ["old", "Installed before ... 333333"]];
+    var appCourses = [["same", "Same 111111", "111111"], ["edited", "Edited 222222", "222222"], ["old", "Installed before ... 333333", "333333"]];
     var deviceNames = ["Same 111111", "Edited 222222", "Installed before ... 333333", "Garmin Connect copy"];
     var installed = { "111111" => "2026-10-01", "222222" => "2026-10-01" };
     var result = SyncPlan.plan(latest, deviceNames, appCourses, installed, false);

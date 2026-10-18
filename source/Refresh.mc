@@ -28,10 +28,11 @@ class Refresh {
             _view.setStatus(message);
             return;
         }
+        var owned = Installed.owned();
         var it = PersistedContent.getAppCourses();
         var course = it.next();
         while (course != null) {
-            if (_tour["id"].equals(SyncPlan.tourIdOf(course.getName()))) {
+            if (_tour["id"].equals(Installed.tourIdFor(course, owned))) {
                 _ownCourse = course;
             }
             course = it.next();
@@ -59,7 +60,7 @@ class Refresh {
             _view.setSummary("The old copy was kept");
             return;
         }
-        Installed.remember(_tour);
+        Installed.remember(_tour, Installed.downloadedCourse(data));
         _card[:state] = "Refreshed";
         _view.setStatus("Refreshed");
         if (_ownCourse != null) {
