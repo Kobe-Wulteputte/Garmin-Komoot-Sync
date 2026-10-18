@@ -53,7 +53,7 @@ class Refresh {
         _card[:state] = "Downloading";
         _view.refresh();
         _before = Installed.appCourseIds();
-        _komoot.downloadFit(_tour["id"], method(:onFit), method(:onProgress), true);
+        _komoot.downloadFit(_tour["id"], method(:onFit), method(:onProgress));
     }
 
     function onProgress(seconds, bytes) {

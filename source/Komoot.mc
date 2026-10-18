@@ -85,10 +85,9 @@ class Komoot {
     // when an activity is recording, and TIMED_OUT when the device does not answer in time.
     // That request may still answer later and could not be told apart from a new one, so no further downloads are
     // started in this app run.
-    // gpx: download Komoot's GPX instead of its FIT; also a course, to test whether it installs during an activity.
-    function downloadFit(tourId, callback, progress, gpx) {
+    function downloadFit(tourId, callback, progress) {
         _callback = callback;
-        if (!gpx && isRecording()) {
+        if (isRecording()) {
             callback.invoke(RECORDING, null);
             return;
         }
@@ -101,10 +100,10 @@ class Komoot {
         _bytes = null;
         _timer = new Timer.Timer();
         _timer.start(method(:onTick), 1000, true);
-        Communications.makeWebRequest(API + "/v007/tours/" + tourId + (gpx ? ".gpx" : ".fit"), null, {
+        Communications.makeWebRequest(API + "/v007/tours/" + tourId + ".fit", null, {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
             :headers => { "Authorization" => _auth },
-            :responseType => gpx ? Communications.HTTP_RESPONSE_CONTENT_TYPE_GPX : Communications.HTTP_RESPONSE_CONTENT_TYPE_FIT,
+            :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_FIT,
             :fileDownloadProgressCallback => method(:onBytes)
         }, method(:onFit));
     }

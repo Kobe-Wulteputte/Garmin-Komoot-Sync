@@ -214,7 +214,7 @@ class Sync {
         _cards[_queue[0][0]["id"]][:state] = "Downloading";
         _view.refresh();
         _before = Installed.appCourseIds();
-        _komoot.downloadFit(_queue[0][0]["id"], method(:onFit), method(:onProgress), false);
+        _komoot.downloadFit(_queue[0][0]["id"], method(:onFit), method(:onProgress));
     }
 
     function onProgress(seconds, bytes) {
