@@ -1,6 +1,7 @@
 import Toybox.Application;
 import Toybox.Lang;
 import Toybox.PersistedContent;
+import Toybox.Time;
 
 // One sync run: load the latest planned tours of the chosen sports, remove own courses whose tour Komoot no longer has,
 // install missing and changed latest tours. Each route gets a card on the view.
@@ -182,6 +183,8 @@ class Sync {
         if (_queue.size() == 0) {
             _view.setStatus(_failed > 0 ? "Done, " + _failed + " failed" : "Up to date");
             _view.setSummary(_added + " added · " + _updated + " updated · " + _removed + " removed · " + _onDevice + " kept");
+            // Shown on the glance.
+            Storage.setValue("lastSync", { "time" => Time.now().value(), "routes" => _added + _updated + _onDevice });
             return;
         }
         _view.setStatus("Downloading " + (_queueSize - _queue.size() + 1) + " of " + _queueSize);

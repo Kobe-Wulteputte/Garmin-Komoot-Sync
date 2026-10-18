@@ -103,6 +103,8 @@ Open **Komoot Sync** from the Connect IQ menu. It starts with a menu:
 
 Swipe up and down (or use the up and down buttons) to scroll through the cards. Back returns to the menu.
 
+**Glance.** On devices with glances (every supported model except the Edge 830) you can add Komoot Sync to the glance list. It shows the app icon, the name and the last sync, for example `17 Oct 14:05 · 5 routes`; select it to open the app.
+
 ## How it decides
 
 - **Which tours:** planned tours (not recorded rides) of the sports switched on in the settings, newest first. There is a switch for every sport Komoot can plan: road, gravel, bike touring, mountain biking and enduro (each also as e-bike), hiking, mountaineering and running. The cycling sports are on by default.
