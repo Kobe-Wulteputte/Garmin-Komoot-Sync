@@ -1,0 +1,5 @@
+<properties>
+    <property id="email" type="string"></property>
+    <property id="password" type="string"></property>
+    <property id="count" type="number">5</property>
+</properties>

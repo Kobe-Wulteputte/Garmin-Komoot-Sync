@@ -1,0 +1,11 @@
+bin/
+gen/
+spike/out/
+*.der
+*.pem
+developer_key
+*.prg
+*.prg.debug.xml
+mir/
+internal-mir/
+source-local/

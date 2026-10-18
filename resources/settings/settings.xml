@@ -1,0 +1,11 @@
+<settings>
+    <setting propertyKey="@Properties.email" title="@Strings.EmailTitle">
+        <settingConfig type="alphaNumeric"/>
+    </setting>
+    <setting propertyKey="@Properties.password" title="@Strings.PasswordTitle">
+        <settingConfig type="password"/>
+    </setting>
+    <setting propertyKey="@Properties.count" title="@Strings.CountTitle">
+        <settingConfig type="numeric" min="1" max="20"/>
+    </setting>
+</settings>

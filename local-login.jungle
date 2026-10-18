@@ -1,0 +1,2 @@
+base.sourcePath = source;source-local
+base.excludeAnnotations = no_local_login

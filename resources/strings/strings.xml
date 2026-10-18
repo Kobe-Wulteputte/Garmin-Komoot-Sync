@@ -1,0 +1,6 @@
+<strings>
+    <string id="AppName">Komoot Sync</string>
+    <string id="EmailTitle">Komoot email</string>
+    <string id="PasswordTitle">Komoot password</string>
+    <string id="CountTitle">Number of latest tours</string>
+</strings>
