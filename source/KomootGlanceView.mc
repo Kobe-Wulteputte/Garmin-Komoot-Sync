@@ -16,9 +16,8 @@ class KomootGlanceView extends WatchUi.GlanceView {
     }
 
     function onUpdate(dc as Dc) as Void {
-        var settings = System.getDeviceSettings();
-        var edge = settings.screenShape != System.SCREEN_SHAPE_ROUND;
-        var light = edge && settings has :isNightModeEnabled && !settings.isNightModeEnabled;
+        var edge = System.getDeviceSettings().screenShape != System.SCREEN_SHAPE_ROUND;
+        var light = Theme.isLight();
 
         var x = 0;
         if (edge) {

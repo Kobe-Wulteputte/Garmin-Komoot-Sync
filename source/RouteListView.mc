@@ -15,6 +15,7 @@ class RouteListView extends WatchUi.View {
     private var _visible as Number = 1;
     private var _follow as Boolean = true;
     private var _shown as Boolean = false;
+    private var _light as Boolean = false;
 
     function initialize(status as String) {
         View.initialize();
@@ -76,20 +77,23 @@ class RouteListView extends WatchUi.View {
         var small = Graphics.FONT_XTINY;
         var smallH = dc.getFontHeight(small);
 
-        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        // Follow the Edge theme (light unless night mode), like the system menus around this screen.
+        _light = Theme.isLight();
+        var background = _light ? Graphics.COLOR_WHITE : Graphics.COLOR_BLACK;
+        dc.setColor(background, background);
         dc.clear();
 
         var y = margin;
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(textColor(), Graphics.COLOR_TRANSPARENT);
         dc.drawText(w / 2, y, Graphics.FONT_SMALL, fit(_status, Graphics.FONT_SMALL, width, dc.getFontHeight(Graphics.FONT_SMALL)), Graphics.TEXT_JUSTIFY_CENTER);
         y += dc.getFontHeight(Graphics.FONT_SMALL);
         if (_summary != null) {
-            dc.setColor(0xBBBBBB, Graphics.COLOR_TRANSPARENT);
+            dc.setColor(mutedColor(), Graphics.COLOR_TRANSPARENT);
             dc.drawText(w / 2, y, small, fit(_summary, small, width, smallH), Graphics.TEXT_JUSTIFY_CENTER);
             y += smallH;
         }
         y += GAP / 2;
-        dc.setColor(0x444444, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_light ? 0xCCCCCC : 0x444444, Graphics.COLOR_TRANSPARENT);
         dc.drawLine(left, y, left + width, y);
         y += GAP;
 
@@ -116,16 +120,16 @@ class RouteListView extends WatchUi.View {
         var smallH = dc.getFontHeight(small);
         var pad = 6;
         var inner = width - 2 * pad;
-        dc.setColor(0x222222, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_light ? 0xEEEEEE : 0x222222, Graphics.COLOR_TRANSPARENT);
         dc.fillRoundedRectangle(x, y, width, height, 8);
         dc.setColor(stateColor(card[:state]), Graphics.COLOR_TRANSPARENT);
         dc.fillRectangle(x, y + 4, 3, height - 8);
 
         var textY = y + 4;
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(textColor(), Graphics.COLOR_TRANSPARENT);
         dc.drawText(x + pad, textY, nameFont, fit(card[:name], nameFont, inner, nameH), Graphics.TEXT_JUSTIFY_LEFT);
         textY += nameH;
-        dc.setColor(0xBBBBBB, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(mutedColor(), Graphics.COLOR_TRANSPARENT);
         dc.drawText(x + pad, textY, small, fit(card[:detail], small, inner, smallH), Graphics.TEXT_JUSTIFY_LEFT);
         textY += smallH;
         dc.drawText(x + pad, textY, small, card[:date], Graphics.TEXT_JUSTIFY_LEFT);
@@ -133,23 +137,32 @@ class RouteListView extends WatchUi.View {
         dc.drawText(x + width - pad, textY, small, card[:state], Graphics.TEXT_JUSTIFY_RIGHT);
     }
 
+    private function textColor() as Number {
+        return _light ? Graphics.COLOR_BLACK : Graphics.COLOR_WHITE;
+    }
+
+    private function mutedColor() as Number {
+        return _light ? 0x555555 : 0xBBBBBB;
+    }
+
+    // Darker shades on the light theme keep the state readable on a light card.
     private function stateColor(state) as Number {
         if ("Added".equals(state) || "Refreshed".equals(state)) {
-            return 0x55DD55;
+            return _light ? 0x2E8B2E : 0x55DD55;
         }
         if ("Updated".equals(state)) {
-            return 0x55AAFF;
+            return _light ? 0x1E6FD9 : 0x55AAFF;
         }
         if ("Removed".equals(state)) {
-            return 0xFF6666;
+            return _light ? 0xC62828 : 0xFF6666;
         }
         if ("Failed".equals(state) || "Too large".equals(state)) {
-            return 0xFFAA00;
+            return _light ? 0xC56A00 : 0xFFAA00;
         }
         if ("Downloading".equals(state)) {
-            return 0xFFFF55;
+            return _light ? 0x9A7D00 : 0xFFFF55;
         }
-        return 0x999999;
+        return _light ? 0x777777 : 0x999999;
     }
 
     // Cuts text to one line of the given width, ending in an ellipsis when it is too long.
