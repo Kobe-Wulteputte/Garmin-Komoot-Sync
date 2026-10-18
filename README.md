@@ -13,6 +13,30 @@ Start it on the Edge and it:
 
 It never touches courses it did not install.
 
+## Why not Komoot's own options?
+
+Komoot gets routes onto a Garmin in two ways: its own Connect IQ app, and the course sync through Garmin Connect. Both leave gaps that this app fills.
+
+| | Komoot Connect IQ app | Komoot → Garmin Connect sync | This app |
+|---|---|---|---|
+| Several routes at once | No, one route at a time | Yes, in the background | Yes: one tap syncs the latest X |
+| Removes routes you deleted in Komoot | No | No, the device keeps filling up | Yes, its own courses |
+| Knows what is already on the device | No | No | Yes, from any source |
+| Duplicates when you use both | Yes | Yes | No new ones |
+| Picks up edits to a route | Download it again by hand | Unclear | Yes |
+| Only the sports you want on the device | Pick by hand | No, every planned tour | Yes, a switch per sport |
+| You control how many routes | By hand | No | Yes, 1 to 50 latest |
+
+**Much faster for several routes.** With the Komoot Connect IQ app you open, download and wait for each route separately. This app fetches all missing routes in one run: start it, and the latest X are on the device a moment later.
+
+**A clean device.** The Garmin Connect sync only ever adds courses, so the course list grows until the device is full and you clean it up by hand. This app removes the courses it installed as soon as you delete their tour in Komoot.
+
+**No duplicates.** Neither Komoot option knows what the other already put on the device, so the same route ends up there twice. This app checks every course on the device first, whatever installed it.
+
+**Edits arrive.** Change a route in Komoot and the next sync replaces the course with the new version.
+
+**Only what you ride.** Planned a hike or a run? With the sport switches, those stay off your bike computer.
+
 > **Warning.** Komoot has no public API for individuals. This app signs in with your Komoot email and password through the same unofficial API that community tools use. That is against Komoot's terms and can stop working at any time. Your password is stored in plain text in the app settings on your phone and on the Edge. Use it at your own risk.
 
 ## Before you start
