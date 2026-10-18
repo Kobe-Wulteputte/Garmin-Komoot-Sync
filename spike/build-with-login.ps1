@@ -1,6 +1,8 @@
 # One-off device build with your Komoot login built in, for sideloaded tests (sideloaded apps get no settings from Garmin Connect Mobile).
 # The login only lives in the output .PRG: the temporary source file is deleted after the build.
 
+param([string]$Device = "edge840")
+
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $sdk = Get-Content "$env:APPDATA\Garmin\ConnectIQ\current-sdk.cfg" -Raw
@@ -28,7 +30,7 @@ function localCredentials() {
 
     $built = Join-Path $buildDir 'KOMOOT-EDGE-SYNC.PRG'
     java -jar (Join-Path $sdk.Trim() 'bin\monkeybrains.jar') `
-        -f "$root\monkey.jungle;$root\local-login.jungle" -d edge830 -o $built -y "$root\developer_key" -r
+        -f "$root\monkey.jungle;$root\local-login.jungle" -d $Device -o $built -y "$root\developer_key" -r
     if ($LASTEXITCODE -ne 0) { throw "Build failed with exit code $LASTEXITCODE" }
     $prg = Join-Path $outDir 'KOMOOT-EDGE-SYNC.PRG'
     Copy-Item $built $prg -Force

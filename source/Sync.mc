@@ -174,7 +174,9 @@ class Sync {
 
     private function installNext() {
         if (_queue.size() == 0) {
-            finish("Added " + _added + ", updated " + _updated + ", removed " + _removed + ", already on device " + _onDevice + ", failed " + _failed);
+            // Two lines: the full summary is wider than the Edge 830 screen.
+            log("Added " + _added + ", updated " + _updated + ", removed " + _removed);
+            finish("Already on device " + _onDevice + ", failed " + _failed);
             return;
         }
         var tour = _queue[0][0];
@@ -207,7 +209,7 @@ class Sync {
         if (count == null || count < 1) {
             return 5;
         }
-        return count > 20 ? 20 : count;
+        return count > 50 ? 50 : count;
     }
 
     private function get(url, params, auth, responseType, callback) {

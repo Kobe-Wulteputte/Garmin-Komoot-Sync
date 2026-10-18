@@ -6,6 +6,6 @@
         <settingConfig type="password"/>
     </setting>
     <setting propertyKey="@Properties.count" title="@Strings.CountTitle">
-        <settingConfig type="numeric" min="1" max="20"/>
+        <settingConfig type="numeric" min="1" max="50"/>
     </setting>
 </settings>

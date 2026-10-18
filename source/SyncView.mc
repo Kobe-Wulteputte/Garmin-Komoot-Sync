@@ -36,7 +36,8 @@ class SyncView extends WatchUi.View {
 
     function onSyncDone() as Void {
         _running = false;
-        log("Tap to sync again");
+        // Edge 540/550 have no touchscreen; there the enter button triggers onSelect.
+        log(System.getDeviceSettings().isTouchScreen ? "Tap to sync again" : "Press enter to sync again");
     }
 
     function log(line as String) as Void {
